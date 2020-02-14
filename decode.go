@@ -6,9 +6,9 @@ import (
 )
 
 type Custom interface{}
-type custom struct{ Custom }
 
 var cSlice = make(map[string]Custom)
+var empty Custom
 
 func RegisterCustom(name string, c Custom) {
 	cSlice[name] = c
@@ -18,7 +18,11 @@ func CustomHookFunc(
 	f reflect.Type,
 	t reflect.Type,
 	data interface{}) (interface{}, error) {
-	if f.Kind() != reflect.Map || t.Kind() != reflect.Interface || !reflect.TypeOf((*custom)(nil)).Implements(t) {
+
+	if f.Kind() != reflect.Map || t.Kind() != reflect.Interface {
+		return data, nil
+	}
+	if of := reflect.TypeOf(&empty); of.Elem() == nil || !of.Elem().Implements(t) {
 		return data, nil
 	}
 	val, ok := data.(map[string]interface{})
