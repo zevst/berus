@@ -18,7 +18,7 @@ func CustomHookFunc(
 	f reflect.Type,
 	t reflect.Type,
 	data interface{}) (interface{}, error) {
-	if f.Kind() != reflect.Map || t.Kind() != reflect.Interface || !reflect.TypeOf((*custom)(nil)).Implements(t){
+	if f.Kind() != reflect.Map || t.Kind() != reflect.Interface || !reflect.TypeOf((*custom)(nil)).Implements(t) {
 		return data, nil
 	}
 	val, ok := data.(map[string]interface{})
@@ -38,5 +38,6 @@ func CustomHookFunc(
 		return nil, newError("Unregistered custom type")
 	}
 	delete(val, "_type")
-	return c, mapstructure.Decode(val, c)
+	value := reflect.New(reflect.TypeOf(c).Elem()).Interface()
+	return value, mapstructure.Decode(val, value)
 }
